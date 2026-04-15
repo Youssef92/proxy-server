@@ -1,28 +1,48 @@
 const express = require("express");
 const { createProxyMiddleware } = require("http-proxy-middleware");
+const cors = require("cors");
 
 const app = express();
 
-// Proxy configuration for API and SignalR
-const proxy = createProxyMiddleware({
-  target: "http://brokersystem.runasp.net",
-  changeOrigin: true,
-  ws: true, // Enables proxying of WebSockets for SignalR support
-  secure: false,
-  logLevel: "debug",
-});
+app.use(
+  cors({
+    origin: "https://broker-frontend-pi.vercel.app",
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: [
+      "Content-Type",
+      "Authorization",
+      "X-Client-Id",
+      "X-Device-Id",
+    ],
+  }),
+);
 
-// Use proxy for all incoming requests
-app.use("/", proxy);
+const TARGET_URL = "http://brokersystem.runasp.net";
 
-// Use port 10000 for Render or fallback to 3000 locally
-const PORT = process.env.PORT || 10000;
+app.use(
+  "/",
+  createProxyMiddleware({
+    target: TARGET_URL,
+    changeOrigin: true,
+    ws: true,
+    onProxyRes: function (proxyRes, req, res) {
+      proxyRes.headers["Access-Control-Allow-Origin"] =
+        "https://broker-frontend-pi.vercel.app";
+      proxyRes.headers["Access-Control-Allow-Credentials"] = "true";
+      proxyRes.headers["Access-Control-Allow-Methods"] =
+        "GET, POST, PUT, DELETE, OPTIONS";
+      proxyRes.headers["Access-Control-Allow-Headers"] =
+        "Content-Type, Authorization, X-Client-Id, X-Device-Id";
+    },
+    onError: (err, req, res) => {
+      console.error("Proxy Error:", err);
+      res.status(500).send("Proxy to Backend failed.");
+    },
+  }),
+);
 
-const server = app.listen(PORT, () => {
-  console.log(`Proxy server running on port ${PORT}`);
-});
-
-// Handle WebSocket upgrade events for SignalR debugging
-server.on("upgrade", (req, socket, head) => {
-  console.log("Proxying WebSocket upgrade for:", req.url);
+const PORT = process.env.PORT || 8080;
+app.listen(PORT, () => {
+  console.log(`Proxy is running on port ${PORT}`);
 });
