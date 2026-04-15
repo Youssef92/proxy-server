@@ -14,6 +14,7 @@ app.use(
       "Authorization",
       "X-Client-Id",
       "X-Device-Id",
+      "x-requested-with",
     ],
   }),
 );
@@ -33,16 +34,16 @@ app.use(
       proxyRes.headers["Access-Control-Allow-Methods"] =
         "GET, POST, PUT, DELETE, OPTIONS";
       proxyRes.headers["Access-Control-Allow-Headers"] =
-        "Content-Type, Authorization, X-Client-Id, X-Device-Id";
+        "Content-Type, Authorization, X-Client-Id, X-Device-Id, x-requested-with";
     },
     onError: (err, req, res) => {
       console.error("Proxy Error:", err);
-      res.status(500).send("Proxy to Backend failed.");
+      res.status(500).send("Proxy failed.");
     },
   }),
 );
 
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
-  console.log(`Proxy is running on port ${PORT}`);
+  console.log(`Proxy running on port ${PORT}`);
 });
