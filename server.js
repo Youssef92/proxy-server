@@ -39,7 +39,7 @@ app.use(
 
       proxyRes.headers["Access-Control-Allow-Credentials"] = "true";
       proxyRes.headers["Access-Control-Allow-Methods"] =
-        "GET, POST, PUT, DELETE, OPTIONS";
+        "GET, POST, PUT, DELETE, OPTIONS, PATCH";
 
       const requestHeaders = req.headers["access-control-request-headers"];
       if (requestHeaders) {
