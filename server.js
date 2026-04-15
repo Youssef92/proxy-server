@@ -15,6 +15,7 @@ app.use(
       "X-Client-Id",
       "X-Device-Id",
       "x-requested-with",
+      "x-signalr-user-agent",
     ],
   }),
 );
@@ -33,8 +34,10 @@ app.use(
       proxyRes.headers["Access-Control-Allow-Credentials"] = "true";
       proxyRes.headers["Access-Control-Allow-Methods"] =
         "GET, POST, PUT, DELETE, OPTIONS";
-      proxyRes.headers["Access-Control-Allow-Headers"] =
-        "Content-Type, Authorization, X-Client-Id, X-Device-Id, x-requested-with";
+      const requestHeaders = req.headers["access-control-request-headers"];
+      if (requestHeaders) {
+        proxyRes.headers["Access-Control-Allow-Headers"] = requestHeaders;
+      }
     },
     onError: (err, req, res) => {
       console.error("Proxy Error:", err);
