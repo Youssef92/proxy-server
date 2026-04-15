@@ -6,7 +6,7 @@ const app = express();
 
 app.use(
   cors({
-    origin: "https://broker-frontend-pi.vercel.app",
+    origin: ["https://broker-frontend-pi.vercel.app", "http://localhost:5173"],
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: [
@@ -29,11 +29,18 @@ app.use(
     changeOrigin: true,
     ws: true,
     onProxyRes: function (proxyRes, req, res) {
-      proxyRes.headers["Access-Control-Allow-Origin"] =
-        "https://broker-frontend-pi.vercel.app";
+      const origin = req.headers.origin;
+      if (
+        origin === "https://broker-frontend-pi.vercel.app" ||
+        origin === "http://localhost:5173"
+      ) {
+        proxyRes.headers["Access-Control-Allow-Origin"] = origin;
+      }
+
       proxyRes.headers["Access-Control-Allow-Credentials"] = "true";
       proxyRes.headers["Access-Control-Allow-Methods"] =
         "GET, POST, PUT, DELETE, OPTIONS";
+
       const requestHeaders = req.headers["access-control-request-headers"];
       if (requestHeaders) {
         proxyRes.headers["Access-Control-Allow-Headers"] = requestHeaders;
